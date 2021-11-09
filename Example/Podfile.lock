@@ -1,0 +1,16 @@
+PODS:
+  - SwiftSocket (0.1.0)
+
+DEPENDENCIES:
+  - SwiftSocket (from `../`)
+
+EXTERNAL SOURCES:
+  SwiftSocket:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  SwiftSocket: a3b8858b7bb56fec1ab02388a61ca64169f67bee
+
+PODFILE CHECKSUM: f49aa678357bef440505256baa8ac34c762c037f
+
+COCOAPODS: 1.11.2
