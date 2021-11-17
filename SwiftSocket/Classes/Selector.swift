@@ -89,8 +89,7 @@ class Selector{
             switch filter {
             case EVFILT_READ:  evs.formUnion(.read)
             case EVFILT_WRITE: evs.formUnion(.write)
-            case EVFILT_EXCEPT: evs.formUnion(.except)
-            default: assert(false)
+            default: break
             }
             map[Int32(ev.ident)] = evs
         }
@@ -112,7 +111,7 @@ class Selector{
         assert(selectable.fd >= 0)
         guard selectable.fd >= 0 else { return }
         registerMap.removeValue(forKey: selectable.fd)
-        updateEventSet(ident: UInt(selectable.fd), events: [.read, .write, .except], action: [.delete, .disable])
+        updateEventSet(ident: UInt(selectable.fd), events: [.read, .write], action: [.delete, .disable])
     }
     
     func enableWritable(selectable: Selectable, on: Bool) {

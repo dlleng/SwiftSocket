@@ -141,10 +141,6 @@ extension ClientChannel: Selectable {
         if events.contains(.read) {
             onReadable()
         }
-        
-        if events.contains(.except) {
-            //assert(false)
-        }
     }
 }
 

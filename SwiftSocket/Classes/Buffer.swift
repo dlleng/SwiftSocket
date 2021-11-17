@@ -130,7 +130,9 @@ struct CircularBuffer<Element>{
     }
     
     mutating func removeAll() {
-        buf.removeAll()
+        for i in 0..<buf.count {
+            buf[i] = nil
+        }
         headIndex = 0
         tailIndex = 0
     }

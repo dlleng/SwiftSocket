@@ -32,14 +32,14 @@ public enum SocketAddress {
     }
         
     public var ip: String {
-        var buffer: [CChar] = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
-
         switch self {
         case .v4(var addr):
+            var buffer: [CChar] = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
             inet_ntop(self.family.rawValue, &addr.sin_addr,&buffer, socklen_t(INET_ADDRSTRLEN))
             return String(cString: buffer)
         case .v6(var addr):
-            inet_ntop(self.family.rawValue, &addr.sin6_addr,&buffer, socklen_t(INET_ADDRSTRLEN))
+            var buffer: [CChar] = [CChar](repeating: 0, count: Int(INET6_ADDRSTRLEN))
+            inet_ntop(AF_INET6, &addr.sin6_addr,&buffer, socklen_t(INET6_ADDRSTRLEN))
             return String(cString: buffer)
         }
     }

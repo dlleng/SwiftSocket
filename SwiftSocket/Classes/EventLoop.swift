@@ -130,10 +130,12 @@ extension EventLoop {
     
     public func execute(after: TimeInterval, work: @escaping ()->Void) -> Task {
         let task = Task(after: after, execute: work)
-        lock.lock()
-        tasks.append(task)
-        lock.unlock()
-        if !self.inCurrent {
+        if self.inCurrent {
+            tasks.append(task)
+        }else {
+            lock.lock()
+            tasks.append(task)
+            lock.unlock()
             selector.wakeup()
         }
         return task
@@ -141,10 +143,12 @@ extension EventLoop {
     
     public func execute(timer interval: TimeInterval, work: @escaping ()->Void) -> Task {
         let task = Task(interval: interval, repeated: true, execute: work)
-        lock.lock()
-        tasks.append(task)
-        lock.unlock()
-        if !self.inCurrent {
+        if self.inCurrent {
+            tasks.append(task)
+        }else {
+            lock.lock()
+            tasks.append(task)
+            lock.unlock()
             selector.wakeup()
         }
         return task

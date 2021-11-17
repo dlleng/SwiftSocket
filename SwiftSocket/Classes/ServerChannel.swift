@@ -10,7 +10,7 @@ import Foundation
 public class ServerChannel {
     public let eventLoop: EventLoop
     private weak var observer: ChannelObserver?
-    private var socket: Socket?
+     private var socket: Socket?
     
     public init(observer: ChannelObserver?) {
         self.observer = observer
@@ -54,11 +54,6 @@ extension ServerChannel: Selectable {
     }
     
     func onEvents(_ events: EventSet) {
-        if events.contains(.except) {
-            self.onError(.socketError("Server Except", errno))
-            return
-        }
-        
         if events.contains(.read) {
             self.onAcceptable()
         }
@@ -72,7 +67,7 @@ extension ServerChannel {
             return
         }
         let newClient = ClientChannel(observer: observer, eventLoop: eventLoop, socket: newSocket)
-        eventLoop.selector.registEvent(selectable: newClient, events: [.read, .write, .except])
+        eventLoop.selector.registEvent(selectable: newClient, events: [.read, .write])
         
         observer?.channel(self, didAccept: newClient)
     }
