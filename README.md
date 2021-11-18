@@ -17,7 +17,7 @@ SwiftSocket is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'SwiftSocket'
+pod 'SwiftSocket', :git => 'https://github.com/dlleng/SwiftSocket.git', :branch => 'main'
 ```
 
 ## Author
