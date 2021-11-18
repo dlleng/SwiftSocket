@@ -15,10 +15,11 @@ final class Box<T> {
 }
 
 final class PThread {
-    private var _thread: pthread_t!
+    private var _thread: pthread_t?
     var inCurrent: Bool { pthread_equal(_thread, pthread_self()) != 0 }
+    var isRunning: Bool { _thread != nil }
     
-    init(name: String = "SwiftSocket.thread",body: @escaping (PThread?)->Void){
+    func start(name: String = "SwiftSocket.thread",body: @escaping (PThread?)->Void){
         let box: Box<ThreadBoxValue> = Box((body: body, name: name))
         let arg = Unmanaged.passRetained(box).toOpaque()
         
@@ -31,19 +32,16 @@ final class PThread {
             body(nil)
             return nil
         }, arg)
-        precondition(res == 0, "Create thread failed")
+        assert(res == 0, "Create thread failed")
     }
-    
+        
     func join() {
-        let err = pthread_join(_thread, nil)
+        guard let t = _thread else { return }
+        let err = pthread_join(t, nil)
         assert(err == 0)
+        _thread = nil
     }
-    
-    func detach() {
-        let err = pthread_detach(_thread)
-        assert(err == 0)
-    }
-    
+        
     deinit{
         print("\(self)   \(#function)")
     }

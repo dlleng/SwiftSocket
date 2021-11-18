@@ -21,7 +21,7 @@ class ServerVC: UIViewController {
         
         server = ServerChannel(observer: self)
         do {
-            try server.start(host: "0.0.0.0", port: 999)
+            try server.startServer(host: "0.0.0.0", port: 9999)
             print("Start server successed")
         } catch {
             print(error)

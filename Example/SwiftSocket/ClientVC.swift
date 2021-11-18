@@ -19,13 +19,13 @@ class ClientVC: UIViewController {
         self.view.backgroundColor = .white
         
         client = ClientChannel(observer: self)
-        client.connect(host: "www.baidu.com", port: 80)
+        client.connect(host: "www.apple.com", port: 80)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         
-        let data = "GET / HTTP/1.2\r\nHost: www.cnblogs.com\r\n\r\n".data(using: .utf8)!
+        let data = "GET / HTTP/1.2\r\nHost: www.apple.com\r\n\r\n".data(using: .utf8)!
         client.write(data: data)
     }
     

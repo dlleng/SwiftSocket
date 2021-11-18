@@ -19,7 +19,7 @@ public class ServerChannel {
 
     }
     
-    public func start(host: String, port: Int) throws {
+    public func startServer(host: String, port: Int) throws {
         let addr = try SocketAddress.makeAddress(host: host, port: port)
         switch addr {
         case .v4(_):
@@ -37,10 +37,14 @@ public class ServerChannel {
         eventLoop.selector.registEvent(selectable: self, events: [.read])
     }
     
-    public func shutdown() {
-        eventLoop.shutdown()
+    public func stopServer() {
         socket?.close()
         socket = nil
+    }
+    
+    public func shutdown() {
+        stopServer()
+        eventLoop.shutdown()
     }
 }
 

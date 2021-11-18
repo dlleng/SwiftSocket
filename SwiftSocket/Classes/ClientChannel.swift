@@ -64,7 +64,7 @@ public class ClientChannel {
         }
     }
     
-    public func connect(host: String, port: Int, timeout: TimeInterval = 60) {
+    public func connect(host: String, port: Int, timeout: TimeInterval? = nil) {
         eventLoop.execute {
             self.addressResolver = AddressResolver(host: host, port: port)
             
@@ -92,6 +92,7 @@ public class ClientChannel {
                 case .v6(let v6Addr):
                     try? self.connectAddress(socket: sock,v6Addr)
                 }
+                let timeout = timeout ?? 60
                 self.connectTimer = self.eventLoop.execute(after: timeout, work: {[weak self] in
                     self?.onDisconnect(.connectTimeout(timeout))
                 })
@@ -157,7 +158,6 @@ extension ClientChannel {
         disableHeartBeat()
         connectTimer?.cancel()
         connectTimer = nil
-        disableHeartBeat()
         state = .idle
         eventLoop.selector.removeEvent(selectable: self)
         observer?.channel(self, didDisconnect: error)

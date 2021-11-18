@@ -59,18 +59,15 @@ public class Task: Comparable {
 ///Event Loop
 public class EventLoop {
     let selector = Selector()
-    var thread: PThread?
+    var thread = PThread()
     var tasks = Heap<Task>()
     private var lock = NSLock()
     private var running: Bool = true
     
-    public var inCurrent: Bool { thread?.inCurrent ?? false }
+    public var inCurrent: Bool { thread.inCurrent }
     
     public func assertCurrentLoop() {
         assert(inCurrent)
-    }
-    
-    init() {
     }
     
     func loop() {
@@ -95,20 +92,25 @@ public class EventLoop {
     }
     
     func startup() {
-        assert(thread == nil, "There are already a thread exsit")
-        thread = PThread(body: {_ in
+        if thread.isRunning {
+            assert(false, "Thread is already running")
+            return
+        }
+        running = true
+        thread.start(body: {_ in
             self.loop()
         })
     }
     
     func shutdown() {
         assert(!self.inCurrent, "Can not call in EventLoop")
-        assert(thread != nil, "There are no thread exsit")
+        if !thread.isRunning {
+            return
+        }
         
         running = false
         selector.wakeup()
-        thread?.join()
-        thread = nil
+        thread.join()
         tasks.removeAll()
         selector.clean()
     }
