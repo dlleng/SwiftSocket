@@ -24,13 +24,16 @@ TODO: Add long description of the pod here.
   s.homepage         = 'https://github.com/dlleng/SwiftSocket'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'zhaoxin' => 'zhaoxin@micous.com' }
+  s.author           = { 'dlleng' => '2190931560@qq.com' }
   s.source           = { :git => 'https://github.com/dlleng/SwiftSocket.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '9.0'
+  s.requires_arc = true
+  #s.swift_versions = ['4.0', '4.2', '5.0']
+  s.default_subspec = 'core'
 
-  s.source_files = 'SwiftSocket/Classes/**/*'
+  #s.source_files = 'SwiftSocket/Classes/core/*.swift'
   
   # s.resource_bundles = {
   #   'SwiftSocket' => ['SwiftSocket/Assets/*.png']
@@ -39,4 +42,13 @@ TODO: Add long description of the pod here.
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'
+
+  s.subspec 'core' do |ss|
+    ss.source_files = 'SwiftSocket/Classes/core/**/*'
+  end
+  
+  s.subspec 'extension' do |ss|
+    ss.source_files = 'SwiftSocket/Classes/extension/**/*'
+  end
+
 end
