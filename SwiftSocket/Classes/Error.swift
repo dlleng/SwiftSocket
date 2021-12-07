@@ -18,6 +18,12 @@ public enum ChannelError: Error {
     case peerPartyDisconnected
 }
 
+extension ChannelError: LocalizedError {
+    public var errorDescription: String? {
+        description
+    }
+}
+
 extension ChannelError: CustomStringConvertible {
     public var description: String {
         switch self {
