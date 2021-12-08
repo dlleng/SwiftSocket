@@ -8,8 +8,8 @@
 
 Pod::Spec.new do |s|
   s.name             = 'SwiftSocket'
-  s.version          = '1.0.0'
-  s.summary          = 'A short description of SwiftSocket.'
+  s.version          = '1.1.0'
+  s.summary          = 'A simple and powerful tcp socket library.'
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
@@ -30,7 +30,7 @@ TODO: Add long description of the pod here.
 
   s.ios.deployment_target = '9.0'
   s.requires_arc = true
-  #s.swift_versions = ['4.0', '4.2', '5.0']
+  s.swift_versions = ['4.0', '4.2', '5.0']
   s.default_subspec = 'core'
 
   #s.source_files = 'SwiftSocket/Classes/core/*.swift'
