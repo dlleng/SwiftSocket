@@ -7,7 +7,7 @@
 #
 
 Pod::Spec.new do |s|
-  s.name             = 'SwiftSocket'
+  s.name             = 'libSwiftSocket'
   s.version          = '1.1.0'
   s.summary          = 'A simple and powerful tcp socket library.'
 

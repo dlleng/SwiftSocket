@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import SwiftSocket
+import libSwiftSocket
 
 class ClientVC: UIViewController {
     var client: ClientChannel!
