@@ -35,16 +35,19 @@ public class Task: Comparable {
     public func cancel() {
         cancelled = true
     }
-    
-    //return: If the task is complete
-    func executeTask() -> Bool {
+        
+    public func tryFinish() -> Bool {
         guard !cancelled else { return true }
-        execute()
         if repeated {
             nextTime = Date().timeIntervalSince1970 + interval
             return false
         }
         return true
+    }
+    
+    public func executeTask() {
+        guard !cancelled else { return }
+        execute()
     }
     
     public static func < (lhs: Task, rhs: Task) -> Bool {
@@ -58,9 +61,9 @@ public class Task: Comparable {
 
 ///Event Loop
 public class EventLoop {
-    let selector = Selector()
-    var thread = PThread()
-    var tasks = Heap<Task>()
+    internal let selector = Selector()
+    private var thread = PThread()
+    private var tasks = Heap<Task>()
     private var lock = NSLock()
     private var running: Bool = true
     
@@ -72,22 +75,30 @@ public class EventLoop {
     
     func loop() {
         while running {
+            //Get nearest task execute time
             lock.lock()
             let timeout: TimeInterval = tasks.root?.remainTime ?? 600
             lock.unlock()
+            
+            //sleep while no task
             selector.waitForEvents(timeout: max(timeout, 0))
             if !running { return }
             
-            //excuse tasks
+            var arrExecutable = [Task]()
             lock.lock()
             while let task = tasks.root, task.remainTime <= 0 {
-                if task.executeTask() {
+                arrExecutable.append(task)
+                //Remove task if finished, reset next execute time if no
+                if task.tryFinish() {
                     tasks.removeRoot()
                 }else {
                     tasks.heapifyRoot()
                 }
             }
             lock.unlock()
+            
+            //excuse tasks
+            arrExecutable.forEach{ $0.executeTask() }
         }
     }
     
@@ -118,14 +129,18 @@ public class EventLoop {
 
 ///EventLoop task
 extension EventLoop {
+    private func syncAppend(task: Task) {
+        lock.lock()
+        tasks.append(task)
+        lock.unlock()
+    }
+    
     public func execute(work: @escaping ()->Void) {
         if self.inCurrent {
             work()
         }else {
             let task = Task(after: 0, execute: work)
-            lock.lock()
-            tasks.append(task)
-            lock.unlock()
+            syncAppend(task: task)
             selector.wakeup()
         }
     }
@@ -133,11 +148,9 @@ extension EventLoop {
     public func execute(after: TimeInterval, work: @escaping ()->Void) -> Task {
         let task = Task(after: after, execute: work)
         if self.inCurrent {
-            tasks.append(task)
+            syncAppend(task: task)
         }else {
-            lock.lock()
-            tasks.append(task)
-            lock.unlock()
+            syncAppend(task: task)
             selector.wakeup()
         }
         return task
@@ -146,11 +159,9 @@ extension EventLoop {
     public func execute(timer interval: TimeInterval, work: @escaping ()->Void) -> Task {
         let task = Task(interval: interval, repeated: true, execute: work)
         if self.inCurrent {
-            tasks.append(task)
+            syncAppend(task: task)
         }else {
-            lock.lock()
-            tasks.append(task)
-            lock.unlock()
+            syncAppend(task: task)
             selector.wakeup()
         }
         return task
