@@ -169,7 +169,7 @@ struct CircularBuffer<Element>{
     private mutating func doubleCapacity() {
         let newCapacity = capacity * 2
         var newBuf = ContiguousArray<Element?>(repeating: nil, count: newCapacity)
-        let cnt = count
+        let cnt = capacity
         for i in 0..<cnt {
             newBuf[i] = self[i]
         }
