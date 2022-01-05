@@ -62,13 +62,11 @@ public class IPDetector {
         for ifptr in sequence(first: firstAddr, next: {$0.pointee.ifa_next}) {
             let interface = ifptr.pointee
             let saFamily = interface.ifa_addr.pointee.sa_family
-            var addr = interface.ifa_addr.pointee
+            guard let addrPtr = interface.ifa_addr else { continue }
             
             if saFamily == UInt8(AF_INET) {
                 var buffer: [CChar] = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
-                var addrIn = withUnsafePointer(to: &addr) {
-                    $0.withMemoryRebound(to: sockaddr_in.self, capacity: 1){$0.pointee}
-                }
+                var addrIn = addrPtr.withMemoryRebound(to: sockaddr_in.self, capacity: 1){$0.pointee}
                 inet_ntop(Int32(saFamily), &addrIn.sin_addr,&buffer, socklen_t(INET_ADDRSTRLEN))
                 let ipStr = String(cString: buffer)
                 if ipStr == ip {
@@ -77,9 +75,7 @@ public class IPDetector {
                 }
             }else if saFamily == UInt8(AF_INET6) {
                 var buffer: [CChar] = [CChar](repeating: 0, count: Int(INET6_ADDRSTRLEN))
-                var addrIn = withUnsafePointer(to: &addr) {
-                    $0.withMemoryRebound(to: sockaddr_in6.self, capacity: 1){$0.pointee}
-                }
+                var addrIn = addrPtr.withMemoryRebound(to: sockaddr_in6.self, capacity: 1){$0.pointee}
                 inet_ntop(Int32(saFamily), &addrIn.sin6_addr,&buffer, socklen_t(INET6_ADDRSTRLEN))
                 let ipStr = String(cString: buffer)
                 if ipStr == ip {
