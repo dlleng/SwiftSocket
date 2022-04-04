@@ -34,7 +34,7 @@ extension ChannelError: CustomStringConvertible {
         case .connectTimeout(let timeout):
             return "Connect timeout: \(timeout)"
         case .socketError(let des, let erno):
-            return "Socket error:des[\(erno):\(erno.errDescription)]"
+            return "Socket error:\(des)[\(erno):\(erno.errDescription)]"
         case .peerPartyDisconnected:
             return "The peer party disconnected"
         }
