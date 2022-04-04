@@ -72,6 +72,7 @@ class Socket {
     
     func connect(addr: UnsafePointer<sockaddr>, len: socklen_t) throws {
         if Darwin.connect(fd, addr, len) < 0 {
+            if errno == EINPROGRESS { return }
             throw ChannelError.socketError("Connect socket failed!", errno)
         }
     }

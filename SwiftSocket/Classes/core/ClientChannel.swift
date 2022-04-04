@@ -88,9 +88,9 @@ public class ClientChannel {
                 
                 switch addr {
                 case .v4(let v4Addr):
-                    try? self.connectAddress(socket: sock,v4Addr)
+                    try self.connectAddress(socket: sock,v4Addr)
                 case .v6(let v6Addr):
-                    try? self.connectAddress(socket: sock,v6Addr)
+                    try self.connectAddress(socket: sock,v6Addr)
                 }
                 let timeout = timeout ?? 60
                 self.connectTimer = self.eventLoop.execute(after: timeout, work: {[weak self] in
@@ -191,7 +191,7 @@ extension ClientChannel {
         }else if writeBytes == 0 {
             onDisconnect(.peerPartyDisconnected)
         }else if writeBytes < 0 {
-            if errno.canIgnoreErrno { return }
+            if errno.ignorable { return }
             
             onDisconnect(.socketError("Socket Write size(\(writeBytes)) error", errno))
         }
@@ -214,7 +214,7 @@ extension ClientChannel {
         }else if readBytes == 0 {
             onDisconnect(.peerPartyDisconnected)
         }else if readBytes < 0 {
-            if errno.canIgnoreErrno { return }
+            if errno.ignorable { return }
             
             onDisconnect(.socketError("Socket Read size(\(readBytes)) error", errno))
         }
@@ -283,11 +283,5 @@ extension ClientChannel {
             }
             return false
         }
-    }
-}
-
-fileprivate extension Int32 {
-    var canIgnoreErrno: Bool {
-        self == EINTR || self == EWOULDBLOCK || self == EAGAIN
     }
 }

@@ -34,9 +34,23 @@ extension ChannelError: CustomStringConvertible {
         case .connectTimeout(let timeout):
             return "Connect timeout: \(timeout)"
         case .socketError(let des, let erno):
-            return "Connect error[\(erno)]: \(des)"
+            return "Socket error:des[\(erno):\(erno.errDescription)]"
         case .peerPartyDisconnected:
             return "The peer party disconnected"
         }
+    }
+}
+
+
+extension Int32 {
+    var ignorable: Bool {
+        self == EINTR || self == EWOULDBLOCK || self == EAGAIN
+    }
+    
+    var errDescription: String {
+        guard let cStr = strerror(self) else {
+            return "NULL"
+        }
+        return String(cString: cStr)
     }
 }

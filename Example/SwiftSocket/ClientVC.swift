@@ -22,6 +22,11 @@ class ClientVC: UIViewController {
         client.connect(host: "www.apple.com", port: 80)
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        client.disconnect()
+    }
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         
@@ -40,14 +45,14 @@ extension ClientVC: ChannelObserver {
         print("connect \(host):\(port) successed ")
         client.enableHeartBeat(interval: 10, resetOnRead: true, resetOnWrite: true)
         
-        print("\(client.localAddress)")
-        print("\(client.remoteAddress)")
+        print("local: \(client.localAddress)")
+        print("remote: \(client.remoteAddress)")
     }
     
     func channel(_ client: ClientChannel, didRead buffer: ByteBuffer) {
         let str = String(data: buffer.toData(), encoding: .utf8) ?? "NULL"
         print("\(client)  read: \(buffer.count) \(str)")
-        client.write(data: "我收到你发的: \(str)".data(using: .utf8)!)
+        client.write(data: "rcv: \(str)".data(using: .utf8)!)
     }
     
     func channel(_ client: ClientChannel, didWrite buffer: ByteBuffer, userInfo: [String: Any]?) {
@@ -55,8 +60,7 @@ extension ClientVC: ChannelObserver {
     }
     
     func channelHeartBeat(_ client: ClientChannel) {
-        print("== 心跳")
-        client.write(data: "心跳\n".data(using: .utf8)!)
+        client.write(data: "heart beat\n".data(using: .utf8)!)
     }
 }
 
