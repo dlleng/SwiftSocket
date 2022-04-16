@@ -17,12 +17,12 @@ public struct ByteBuffer {
     public var count: Int { max(0, writeIndex - readIndex) }
     internal var userInfo: [String: Any]?
     
-    init(capacity: Int = 1024) {
+    public init(capacity: Int = 1024) {
         self.capacity = capacity
         buffer = [Element](repeating: 0, count: capacity)
     }
     
-    init(data: Data) {
+    public init(data: Data) {
         let bytesArr = [UInt8](data)
         buffer = bytesArr
         capacity = bytesArr.count
@@ -36,20 +36,20 @@ public struct ByteBuffer {
         return Data(bytes: buf, count: buf.count)
     }
     
-    mutating func readPointer() -> UnsafeRawBufferPointer {
+    public mutating func readPointer() -> UnsafeRawBufferPointer {
         let skip = readIndex * MemoryLayout<Element>.stride
         let bufPtr = buffer.withUnsafeMutableBytes {$0}
         return UnsafeRawBufferPointer(start: bufPtr.baseAddress?.advanced(by: skip), count: count)
     }
     
-    mutating func writePointer() -> UnsafeMutableRawBufferPointer {
+    public mutating func writePointer() -> UnsafeMutableRawBufferPointer {
         let skip = writeIndex * MemoryLayout<Element>.stride
         let bufPtr = buffer.withUnsafeMutableBytes {$0}
         return UnsafeMutableRawBufferPointer(start: bufPtr.baseAddress?.advanced(by: skip), count: count)
     }
     
     ///read/write
-    mutating func readInteger<T: FixedWidthInteger>(_ type: T.Type,bigendian: Bool = true) -> T? {
+    public mutating func readInteger<T: FixedWidthInteger>(_ type: T.Type,bigendian: Bool = true) -> T? {
         let size = MemoryLayout<T>.size
         guard size <= count else { return nil }
         var value: T = 0
@@ -61,7 +61,7 @@ public struct ByteBuffer {
         return bigendian ? value.bigEndian : value.littleEndian
     }
     
-    mutating func writeInteger<T: FixedWidthInteger>(_ v: T, bigendian: Bool = true) {
+    public mutating func writeInteger<T: FixedWidthInteger>(_ v: T, bigendian: Bool = true) {
         let size = MemoryLayout<T>.size
         if writeIndex + size > capacity {
             doubleCapacity()
@@ -77,23 +77,23 @@ public struct ByteBuffer {
     }
     
     ///move index
-    mutating func moveReadIndex(to newIndex: Int) {
+    public mutating func moveReadIndex(to newIndex: Int) {
         readIndex = newIndex
     }
     
-    mutating func moveWriteIndex(to newIndex: Int) {
+    public mutating func moveWriteIndex(to newIndex: Int) {
         writeIndex = newIndex
     }
     
-    mutating func moveReadIndex(by offset: Int) {
+    public mutating func moveReadIndex(by offset: Int) {
         readIndex += offset
     }
     
-    mutating func moveWriteIndex(by offset: Int) {
+    public mutating func moveWriteIndex(by offset: Int) {
         writeIndex += offset
     }
     
-    mutating func doubleCapacity() {
+    private mutating func doubleCapacity() {
         let newCapacity = capacity * 2
         var newBuffer = [Element](repeating: 0, count: newCapacity)
         for i in 0..<count {
