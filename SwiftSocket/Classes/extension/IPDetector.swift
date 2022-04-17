@@ -14,7 +14,7 @@ public class IPDetector {
     private var timer: DispatchSourceTimer?
     private var eventBlock: (()->Void)?
 
-    init() {
+    public init() {
     }
     
     //start detect per second

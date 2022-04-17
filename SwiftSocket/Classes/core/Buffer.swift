@@ -56,9 +56,20 @@ public struct ByteBuffer {
         let skip = readIndex * MemoryLayout<Element>.stride
         let valuePtr = withUnsafeMutableBytes(of: &value) {$0}
         let bufPtr = buffer.withUnsafeMutableBytes {$0}
-        let readPtr = UnsafeRawBufferPointer(start: bufPtr.baseAddress?.advanced(by: skip), count: count)
+        let readPtr = UnsafeRawBufferPointer(start: bufPtr.baseAddress?.advanced(by: skip), count: size)
         valuePtr.copyMemory(from: readPtr)
         return bigendian ? value.bigEndian : value.littleEndian
+    }
+    
+    public mutating func readData(size: Int) -> Data? {
+        guard size > 0, size < count else { return nil }
+        var data = [UInt8](repeating: 0, count: size)
+        let skip = readIndex * MemoryLayout<Element>.stride
+        let dataPtr = data.withUnsafeMutableBytes {$0}
+        let bufPtr = buffer.withUnsafeMutableBytes {$0}
+        let readPtr = UnsafeRawBufferPointer(start: bufPtr.baseAddress?.advanced(by: skip), count: size)
+        dataPtr.copyMemory(from: readPtr)
+        return Data(data)
     }
     
     public mutating func writeInteger<T: FixedWidthInteger>(_ v: T, bigendian: Bool = true) {
@@ -74,6 +85,19 @@ public struct ByteBuffer {
         writePtr.copyMemory(from: valuePtr)
         
         moveWriteIndex(by: size)
+    }
+    
+    public mutating func writeData(_ data: Data) {
+        while writeIndex + data.count > capacity {
+            doubleCapacity()
+        }
+        let skip = writeIndex * MemoryLayout<Element>.stride
+        let dataAry = [UInt8](data)
+        let dataPtr = dataAry.withUnsafeBytes {$0}
+        let bufPtr = buffer.withUnsafeMutableBytes {$0}
+        let writePtr = UnsafeMutableRawBufferPointer(start: bufPtr.baseAddress?.advanced(by: skip), count: capacity - writeIndex)
+        writePtr.copyMemory(from: dataPtr)
+        moveWriteIndex(by: data.count)
     }
     
     ///move index
