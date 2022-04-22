@@ -62,7 +62,7 @@ public struct ByteBuffer {
     }
     
     public mutating func readData(size: Int) -> Data? {
-        guard size > 0, size < count else { return nil }
+        guard size > 0, size <= count else { return nil }
         var data = [UInt8](repeating: 0, count: size)
         let skip = readIndex * MemoryLayout<Element>.stride
         let dataPtr = data.withUnsafeMutableBytes {$0}
