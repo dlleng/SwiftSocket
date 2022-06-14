@@ -7,17 +7,18 @@
 import UIKit
 import Network
 
-public protocol SSLHandlerDelegate {
+protocol SSLHandlerDelegate {
     func sslHandshakeSuccessed(_ handler: SSLHandler)
-    func sslHandshake(_ handler: SSLHandler, fail code: Int32)
+    func sslHandshake(_ handler: SSLHandler, failed code: Int32)
     func ssl(_ handler: SSLHandler, inData: Data)
-    func ssl(_ handler: SSLHandler, outData: Data)
+    func ssl(_ handler: SSLHandler, outData: Data, userInfo: [String: Any]?)
 }
 
-public class SSLHandler {
+class SSLHandler {
     private let serailQueue = DispatchQueue(label: "com.serail.SSLHandler")
     private let sslContext: SSLContext
     private var readBuffer = Data()
+    private var userInfo: [String: Any]?
     public var delegate: SSLHandlerDelegate?
     public var state: SSLSessionState {
         var state: SSLSessionState = .idle
@@ -48,8 +49,9 @@ public class SSLHandler {
     }
     
     //send data to ssl
-    func send(data: Data) {
+    func write(data: Data, userInfo: [String: Any]? = nil) {
         serailQueue.async {
+            self.userInfo = userInfo
             let ptr = data.withUnsafeBytes{$0}
             var processed = 0
             SSLWrite(self.sslContext, ptr.baseAddress, data.count, &processed)
@@ -57,21 +59,22 @@ public class SSLHandler {
     }
     
     //receive data from tcp
-    func onReceive(data: Data) {
+    func onRead(data: Data) {
         serailQueue.async {
             self.readBuffer.append(data)
-            guard self.state == .connected else {
+            if self.state != .connected {
                 self._handshake()
-                return
             }
             var rbuf = [UInt8](repeating: 0, count: 4096)
             let pp = rbuf.withUnsafeMutableBytes{$0}
             var processed = 0
-            let status = SSLRead(self.sslContext, pp.baseAddress!, rbuf.count, &processed)
-            if processed > 0 {
-                let sslData = Data(bytes: rbuf, count: processed)
-                self.delegate?.ssl(self, inData: sslData)
-            }
+            repeat {
+                SSLRead(self.sslContext, pp.baseAddress!, rbuf.count, &processed)
+                if processed > 0 {
+                    let sslData = Data(bytes: rbuf, count: processed)
+                    self.delegate?.ssl(self, inData: sslData)
+                }
+            } while processed > 0
         }
     }
     
@@ -88,7 +91,7 @@ public class SSLHandler {
         }else if status == errSSLWouldBlock {
             //need more data
         }else {
-            self.delegate?.sslHandshake(self, fail: status)
+            self.delegate?.sslHandshake(self, failed: status)
         }
     }
 }
@@ -123,7 +126,7 @@ extension SSLHandler {
         _ data: UnsafeRawPointer,
         _ dataLen: UnsafeMutablePointer<Int>) -> OSStatus {
         let data = Data(bytes: data, count: dataLen.pointee)
-        delegate?.ssl(self, outData: data)
+        delegate?.ssl(self, outData: data, userInfo: self.userInfo)
         return noErr
     }
 }
