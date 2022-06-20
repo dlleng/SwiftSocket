@@ -103,14 +103,8 @@ extension SSLHandler {
         _ dataLen: UnsafeMutablePointer<Int>) -> OSStatus {
         if dataLen.pointee == 0 {
             return noErr
-        }else if readBuffer.count == 0 {
-            dataLen.pointee = 0
-            return errSSLWouldBlock
         }else if readBuffer.count < dataLen.pointee {
-            let p = readBuffer.withUnsafeBytes{$0}
-            data.copyMemory(from: p.baseAddress!, byteCount: readBuffer.count)
-            dataLen.pointee = readBuffer.count
-            readBuffer.removeAll()
+            dataLen.pointee = 0
             return errSSLWouldBlock
         }else {
             let p = readBuffer.withUnsafeBytes{$0}
