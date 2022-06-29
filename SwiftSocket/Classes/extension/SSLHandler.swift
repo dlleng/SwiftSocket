@@ -7,14 +7,14 @@
 import UIKit
 import Network
 
-protocol SSLHandlerDelegate {
+public protocol SSLHandlerDelegate {
     func sslHandshakeSuccessed(_ handler: SSLHandler)
     func sslHandshake(_ handler: SSLHandler, failed code: Int32)
     func ssl(_ handler: SSLHandler, inData: Data)
     func ssl(_ handler: SSLHandler, outData: Data, userInfo: [String: Any]?)
 }
 
-class SSLHandler {
+public class SSLHandler {
     private let serailQueue = DispatchQueue(label: "com.serail.SSLHandler")
     private let sslContext: SSLContext
     private var readBuffer = Data()
@@ -49,7 +49,7 @@ class SSLHandler {
     }
     
     //send data to ssl
-    func write(data: Data, userInfo: [String: Any]? = nil) {
+    public func write(data: Data, userInfo: [String: Any]? = nil) {
         serailQueue.async {
             self.userInfo = userInfo
             let ptr = data.withUnsafeBytes{$0}
@@ -59,7 +59,7 @@ class SSLHandler {
     }
     
     //receive data from tcp
-    func onRead(data: Data) {
+    public func onRead(data: Data) {
         serailQueue.async {
             self.readBuffer.append(data)
             if self.state != .connected {
@@ -78,7 +78,7 @@ class SSLHandler {
         }
     }
     
-    func handshake() {
+    public func handshake() {
         serailQueue.async {
             self._handshake()
         }
@@ -107,11 +107,9 @@ extension SSLHandler {
             dataLen.pointee = 0
             return errSSLWouldBlock
         }else {
-            let p = readBuffer.withUnsafeBytes{$0}
-            
-            data.copyMemory(from: p.baseAddress!, byteCount: dataLen.pointee)
-            readBuffer.removeSubrange(0..<dataLen.pointee)
-            
+            let ptr = (readBuffer as NSData).bytes
+            memcpy(data, ptr, dataLen.pointee)
+            readBuffer = readBuffer.subdata(in: dataLen.pointee..<readBuffer.count)
             return noErr
         }
     }

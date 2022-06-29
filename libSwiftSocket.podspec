@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'libSwiftSocket'
-  s.version          = '1.2.6'
+  s.version          = '1.2.7'
   s.summary          = 'A simple and powerful tcp socket library.'
 
 # This description is used to generate tags and improve search results.
